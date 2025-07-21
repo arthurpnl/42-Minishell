@@ -9,7 +9,7 @@ void	tokenize_line(t_token **token, char *str, char **env)
 
 	i = 0;
 	res = ft_split(str);
-	int j = 0;
+	//int j = 0;
 	if (!res)
 		exit(1);
 	while (res[i])
