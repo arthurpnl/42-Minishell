@@ -5,6 +5,8 @@
 # include <stdlib.h>
 # include <signal.h>
 # include <unistd.h>
+# include <fcntl.h>
+# include <sys/wait.h>
 # include <readline/readline.h>
 # include <readline/history.h>
 
@@ -17,6 +19,14 @@ typedef enum	e_token_type
 	TOK_REDIR_APPEND,	// >> = 4
 	TOK_HEREDOC			// << = 5
 }	t_token_type;
+
+typedef enum	e_cmd_type
+{
+	CMD_SIMPLE,	// Commande simple -> Chercher dans PATH
+	CMD_RELATIVE, // Chemin relatif (./cmd)
+	CMD_ABSOLUTE, // Chemin absolu (/bin/cmd)
+	CMD_BUILTIN	// Commande builtin
+} t_cmd_type;
 
 typedef struct s_token_word
 {
@@ -44,6 +54,7 @@ typedef struct s_commande
 {
 	char				**args;
 	t_redirection		*redirection;
+	t_cmd_type			type;
 	struct s_commande	*next;
 }	t_commande;
 
@@ -109,5 +120,10 @@ void	free_redirection(t_redirection *redir);
 void	free_commande(t_commande *cmd);
 void	print_redirection(t_redirection *redir);
 void	print_commande(t_commande *cmd_list);
+
+// exec.c
+int	exec_cmd(t_commande *cmd_list, char **env);
+int	exec_pipeline(t_commande *cmd_list, char **env);
+int	execute(t_commande *cmd_list, char	**env);
 
 #endif
