@@ -96,3 +96,5 @@ void	ft_putstr_fd(char *s, int fd)
 		i++;
 	}
 }
+
+// faire fonction qui check si le path envoye est valide

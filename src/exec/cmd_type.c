@@ -32,7 +32,7 @@ void	identify_cmd_type(t_commande *cmd_list)
 		{
 			if (is_it_builtin(current->args[0]))
 				current->type = CMD_BUILTIN;
-			if (current->args[0][0] == '/')
+			else if (current->args[0][0] == '/')
 				current->type = CMD_ABSOLUTE;
 			else if(current->args[0][0] == '.' && current->args[0][1] == '/')
 				current->type = CMD_RELATIVE;
