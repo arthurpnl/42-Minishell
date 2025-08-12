@@ -9,6 +9,8 @@
 # include <sys/wait.h>
 # include <readline/readline.h>
 # include <readline/history.h>
+# define SHELL_NAME "minishell: "
+# define CMD_NOT_FOUND " No such file or directory\n"
 
 typedef enum	e_token_type
 {
@@ -25,7 +27,7 @@ typedef enum	e_cmd_type
 	CMD_SIMPLE,	// Commande simple -> Chercher dans PATH
 	CMD_RELATIVE, // Chemin relatif (./cmd)
 	CMD_ABSOLUTE, // Chemin absolu (/bin/cmd)
-	CMD_BUILTIN	// Commande builtin
+	CMD_BUILTIN,  // Commande builtin
 	CMD_EMPTY // Cas erreur
 } t_cmd_type;
 
@@ -56,8 +58,19 @@ typedef struct s_commande
 	char				**args;
 	t_redirection		*redirection;
 	t_cmd_type			type;
+	char				**path;
 	struct s_commande	*next;
 }	t_commande;
+
+typedef struct s_pipeline
+{
+    t_commande *cmd_list;
+    int    cmd_count;
+    int    **pipes;
+    pid_t  *pids;
+    int    last_status;
+    char   **env;
+}    t_pipeline;
 
 // main.c
 void	sig_handler(int sig);
@@ -133,10 +146,30 @@ char	*ft_substr(char const *s, unsigned int start, size_t len);
 int		ft_isalnum(int c);
 int		ft_strncmp(const char *s1, const char *s2, size_t n);
 int		is_valid_var_char(char c);
+int	ft_strcmp(const char *s1, const char *s2);
+int	command_dispatch(t_commande *cmd_list, char **env);
+int	exec_builtin(t_commande *cmd_list, char **env);
+int	exec_absolute_cmd(t_commande *cmd_list, char **env);
 
 // exec.c
 int	exec_cmd(t_commande *cmd_list, char **env);
 int	exec_pipeline(t_commande *cmd_list, char **env);
 int	execute(t_commande *cmd_list, char	**env);
+int	exec_single_cmd(t_commande *cmd_list, char **env);
+
+// path.c
+void	get_path_env(t_commande *cmd_list, char **env);
+char	*create_full_path(t_commande	*cmd_list, char **env);
+
+// pipeline.c
+int    create_pipes(int cmd_count);
+
+// redirect.c
+int    dispatch_redirect(t_commande *cmd_list);
+int    handle_input_redirect(t_redirection *redir);
+int    handle_output_redirect(t_redirection *redir);
+int    handle_append_redirect(t_redirection *redir);
+
+// here_doc.c
 
 #endif
