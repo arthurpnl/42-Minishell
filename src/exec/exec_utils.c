@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   exec_utils.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/29 13:54:31 by arthur            #+#    #+#             */
+/*   Updated: 2025/08/25 16:34:05 by arthur           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 static int	ft_len_words(const char *str, char sep)
@@ -62,7 +74,7 @@ char	**ft_split_ex(const char *s, char sep)
 
 	if (!s)
 		return (NULL);
-	res = ft_calloc((count_words(s, sep) + 1), sizeof(*res));
+	res = ft_calloc((count_words_ex(s, sep) + 1), sizeof(*res));
 	if (!res)
 		return (NULL);
 	i = 0;
@@ -126,11 +138,26 @@ void	*ft_calloc(size_t count, size_t size)
 	return (ptr);
 }
 
-void	init_pipeline(t_pipeline *pipeline)
+void	*ft_memset(void *s, int c, size_t n)
 {
-    pipeline->cmd_count = count_commands(pipeline->cmd_list);
-    pipeline->pipes = create_pipes(pipeline->cmd_count);
-    pipeline->pids = malloc(sizeof(int) * pipeline->cmd_count);
-    pipeline->env = env;
-    pipeline->last_status = 0;
+	char	*str;
+
+	str = s;
+	while (n)
+	{
+		*str++ = (unsigned char)c;
+		n--;
+	}
+	return (s);
+}
+
+void	init_pipeline(t_pipeline *pipeline, t_commande *cmd_list, char **env)
+{
+	pipeline->cmd_list = cmd_list;
+	pipeline->cmd_count = count_command(cmd_list);
+	pipeline->env = env;
+	pipeline->last_status = 0;
+	pipeline->pids = malloc(sizeof(pid_t) * pipeline->cmd_count);
+	if (!pipeline->pids)
+		exit(EXIT_FAILURE);
 }

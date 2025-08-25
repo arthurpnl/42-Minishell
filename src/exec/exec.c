@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/29 13:54:31 by arthur            #+#    #+#             */
-/*   Updated: 2025/08/25 14:39:48 by arthur           ###   ########.fr       */
+/*   Updated: 2025/08/25 16:50:52 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,10 @@ int	exec_single_cmd(t_commande *cmd_list, char **env)
 			exit (127);
 		}
         if (dispatch_redirect(cmd_list) != 0)
+		{
+			free(cmd_path);
             exit(EXIT_FAILURE);
+		}
 		execve(cmd_path, cmd_list->args, env);
 		perror(cmd_list->args[0]);
 		free(cmd_path);
@@ -98,61 +101,95 @@ int	exec_absolute_cmd(t_commande *cmd_list, char **env)
 		return (1);
 }
 
-void exec_child(t_commande *cmd_list, t_pipeline *pipeline, char **env, int i)
+int exec_command_direct(t_commande *cmd_list, char **env)
 {
-    if (pipeline->cmd_count > 1)
-        handle_pipe_redirect(cmd_list->redirection, cmd_list, pipeline->pipes, i);
-    if (dispatch_redirect(cmd_list) != 0)
-        exit(EXIT_FAILURE);
-    if (cmd_list->type == CMD_BUILTIN)
-        exit(exec_builtin(cmd_list, env));
-    else if (cmd_list->type == CMD_ABSOLUTE)
-        exec_absolute_cmd(cmd_list, env);
-    else if (cmd_list->type == CMD_RELATIVE)
-        exec_absolute_cmd(cmd_list, env);
+	if (cmd_list->type == CMD_SIMPLE)
+	{
+		char *cmd_path;
+		cmd_path = create_full_path(cmd_list, env);
+		if (!cmd_path)
+			exit(127);
+		execve(cmd_path, cmd_list->args, env);
+		free(cmd_path);
+	}
+	else if (cmd_list->type == CMD_ABSOLUTE || cmd_list->type == CMD_RELATIVE)
+		execve(cmd_list->args[0], cmd_list->args, env);
+	exit(127);
 }
 
 int	exec_pipeline(t_commande *cmd_list, char **env)
 {
-    pid_t    pid;
-    t_pipeline    *pipeline;
-    t_commande    *curr;
+	pid_t    pid;
+	t_pipeline    *pipeline;
+	t_commande    *curr;
 	int	i;
 
 	i = 0;
-    curr = cmd_list;
+	curr = cmd_list;
 	pipeline = malloc(sizeof(t_pipeline));
-	init_pipeline(pipeline);
-    pipeline->cmd_list = cmd_list;
-    pipeline->cmd_count = count_command(cmd_list);
-    if (create_pipes(pipeline) != 0)
-        return (1);
-    while (curr)
-    {
-        pid = fork();
-        if (pid < 0)
-        {
-        	perror("fork");
-        	exit(EXIT_FAILURE);
-        }
-        if (pid == 0)
+	init_pipeline(pipeline, cmd_list, env);
+
+	if (create_pipes(pipeline) != 0)
+		return (1);
+
+	while (curr)
+	{
+		pid = fork();
+		if (pid < 0)
 		{
-            exec_child(curr, pipeline, env, i);
+			perror("fork");
 			exit(EXIT_FAILURE);
 		}
-        curr = curr->next;
+		if (pid == 0)
+		{
+			exec_child(curr, pipeline, env, i);
+			exit(EXIT_FAILURE);
+		}
+		pipeline->pids[i] = pid;
+		curr = curr->next;
 		i++;
-    }
-    close_and_wait(pipeline);
-    return (0);
+	}
+	close_all_pipes(pipeline->pipes, pipeline->cmd_count);
+
+	close_and_wait(pipeline);
+	return (0);
 }
+
+void exec_child(t_commande *cmd_list, t_pipeline *pipeline, char **env, int i)
+{
+	if (pipeline->cmd_count > 1)
+		handle_pipe_redirect(pipeline->pipes, i, pipeline->cmd_count);
+
+	if (dispatch_redirect(cmd_list) != 0)
+		exit(EXIT_FAILURE);
+
+	if (cmd_list->type == CMD_BUILTIN)
+		exit(exec_builtin(cmd_list, env));
+	else
+		exec_command_direct(cmd_list, env);
+}
+
+/*void exec_child(t_commande *cmd_list, t_pipeline *pipeline, char **env, int i)
+{
+	if (pipeline->cmd_count > 1)
+		handle_pipe_redirect(pipeline->pipes, i, pipeline->cmd_count);
+	if (dispatch_redirect(cmd_list) != 0)
+		exit(EXIT_FAILURE);
+	if (cmd_list->type == CMD_BUILTIN)
+		exit(exec_builtin(cmd_list, env));
+	else
+		exec_command_direct(cmd_list, env);
+}*/
+
 
 void close_and_wait(t_pipeline *pipeline)
 {
-	close_all_pipes(pipeline->pipes, pipeline->cmd_count);
+	// Les pipes sont déjà fermés par le parent
 	while (wait(NULL) > 0)
-            ;
-	free_pipes(pipeline->pipes, pipeline->cmd_count);
+		;
+	free_pipes(pipeline->pipes, pipeline->cmd_count - 1);
+	free(pipeline->pids);
+	free(pipeline);
 }
 
 int	exec_builtin(t_commande *cmd_list, char **env)
