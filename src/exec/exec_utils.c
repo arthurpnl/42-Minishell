@@ -38,7 +38,7 @@ static char	*cpy_word(const char *str, char sep, size_t len)
 	return (cpy);
 }
 
-static int	count_words(const char *str, char sep)
+static int	count_words_ex(const char *str, char sep)
 {
 	size_t	i;
 	size_t	words;
