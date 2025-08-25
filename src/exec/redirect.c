@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/29 13:54:31 by arthur            #+#    #+#             */
-/*   Updated: 2025/08/25 12:31:28 by arthur           ###   ########.fr       */
+/*   Updated: 2025/08/25 16:52:17 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,20 +96,26 @@ int    handle_append_redirect(t_redirection *redir)
     return (0);
 }
 
-int    handle_pipe_redirect(t_redirection *redir, t_commande *cmd_list, int **pipes, int i)
+int    handle_pipe_redirect(int **pipes, int i, int cmd_count)
 {
-    int    count_cmd;
+    int j;
 
-    count_cmd = count_command(cmd_list);
     if (i == 0)
         dup2(pipes[0][1], STDOUT_FILENO);
-    else if (i > 0 && i < count_cmd - 1)
+    else if (i > 0 && i < cmd_count - 1)
     {
         dup2(pipes[i - 1][0], STDIN_FILENO);
         dup2(pipes[i][1], STDOUT_FILENO);
     }
-    else if (i == count_cmd - 1 && nb > 1)
+    else if (i == cmd_count - 1 && cmd_count > 1)
         dup2(pipes[i - 1][0], STDIN_FILENO);
-    close_all_pipes(pipes, i);
+
+    j = 0;
+    while (j < cmd_count - 1)
+    {
+        close(pipes[j][0]);
+        close(pipes[j][1]);
+        j++;
+    }
     return (0);
 }
