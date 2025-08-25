@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   token_word.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/29 13:54:31 by arthur            #+#    #+#             */
+/*   Updated: 2025/08/25 16:01:48 by arthur           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 t_token_word	*split_node_word(char *str, char **env)
@@ -23,7 +35,7 @@ t_token_word	*split_node_word(char *str, char **env)
 		add_back_word(&head_word, new_word);
 		i++;
 	}
-	// free_split(word);
+	free_split(word);
 	return (head_word);
 }
 
@@ -34,7 +46,7 @@ t_token_word	*new_node_word(char *str)
 	new = malloc(sizeof(t_token_word));
 	if (!new)
 		return (NULL);
-	new->word = str;
+	new->word = ft_strdup(str);
 	new->expendable = 1;
 	new->next = NULL;
 	return (new);
