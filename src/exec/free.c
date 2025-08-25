@@ -1,6 +1,6 @@
 #include "minishell.h"
 
-void	free_pipes(int *pipes, int count)
+void	free_pipes(int **pipes, int count)
 {
     int    i;
 
