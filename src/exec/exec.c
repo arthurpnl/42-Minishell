@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/29 13:54:31 by arthur            #+#    #+#             */
-/*   Updated: 2025/07/29 15:13:10 by arthur           ###   ########.fr       */
+/*   Updated: 2025/08/25 14:25:32 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ int	command_dispatch(t_commande *cmd_list, char **env)
 			return (1); // error
 	}
 	else
-	return (exec_pipeline(cmd_list, env));
+		return (exec_pipeline(cmd_list, env));
 }
 
 int	exec_single_cmd(t_commande *cmd_list, char **env)
@@ -98,13 +98,13 @@ int	exec_absolute_cmd(t_commande *cmd_list, char **env)
 		return (1);
 }
 
-void exec_child(t_commande *cmd_list, char **env)
+void exec_child(t_commande *cmd_list, t_pipeline *pipeline, char **env, int i)
 {
     if (pipeline->cmd_count > 1)
-        handle_pipe_redirect(curr->redirection, cmd_list, pipeline->pipes, i);
+        handle_pipe_redirect(cmd_list->redirection, cmd_list, pipeline->pipes, i);
     if (dispatch_redirect(cmd_list) != 0)
         exit(EXIT_FAILURE);
-    if (cmd->type == CMD_BUILTIN)
+    if (cmd_list->type == CMD_BUILTIN)
         exit(exec_builtin(cmd_list, env));
     else if (cmd_list->type == CMD_ABSOLUTE)
         exec_absolute_cmd(cmd_list, env);
@@ -114,39 +114,46 @@ void exec_child(t_commande *cmd_list, char **env)
 
 int	exec_pipeline(t_commande *cmd_list, char **env)
 {
-    t_pid    pid;
+    pid_t    pid;
     t_pipeline    *pipeline;
     t_commande    *curr;
+	int	i;
 
-    i = 0;
+	i = 0;
     curr = cmd_list;
-    pipeline.cmd_list = cmd_list;
-    pipeline.cmd_count = count_commands(cmd_list);
-    if (create_pipes(&pipeline) != 0)
+	pipeline = malloc(sizeof(t_pipeline));
+	init_pipeline(pipeline);
+    pipeline->cmd_list = cmd_list;
+    pipeline->cmd_count = count_command(cmd_list);
+    if (create_pipes(pipeline) != 0)
         return (1);
     while (curr)
     {
         pid = fork();
-        if (pid == 0)
+        if (pid < 0)
         {
-        perror("fork");
-        exit(EXIT_FAILURE);
+        	perror("fork");
+        	exit(EXIT_FAILURE);
         }
-        if (pid > 0)
-            execute_child(curr, env);
+        if (pid == 0)
+		{
+            exec_child(curr, pipeline, env, i);
+			exit(EXIT_FAILURE);
+		}
         curr = curr->next;
+		i++;
     }
-    close_and_wait(&pipeline);
+    close_and_wait(pipeline);
     return (0);
 }
 
-    void close_and_wait(t_pipeline *pipeline)
-    {
-        close_all_pipes(pipeline->pipes, pipeline->cmd_count );
-        while (wait(NULL) > 0);
+void close_and_wait(t_pipeline *pipeline)
+{
+	close_all_pipes(pipeline->pipes, pipeline->cmd_count);
+	while (wait(NULL) > 0);
             ;
-        free_pipes(pipeline->pipes, pipeline->cmd_count);
-    }
+	free_pipes(pipeline->pipes, pipeline->cmd_count);
+}
 
 int	exec_builtin(t_commande *cmd_list, char **env)
 {
