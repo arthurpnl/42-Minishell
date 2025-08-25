@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/29 13:54:31 by arthur            #+#    #+#             */
-/*   Updated: 2025/08/07 10:34:51 by arthur           ###   ########.fr       */
+/*   Updated: 2025/08/25 12:31:28 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,7 @@ int    handle_append_redirect(t_redirection *redir)
     return (0);
 }
 
-int    handle_pipe_redirect(t_redirection *redir,t_commande cmd_list, int **pipes, int i)
+int    handle_pipe_redirect(t_redirection *redir, t_commande *cmd_list, int **pipes, int i)
 {
     int    count_cmd;
 
