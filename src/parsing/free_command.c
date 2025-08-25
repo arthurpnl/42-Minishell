@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   free_command.c                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/29 13:54:31 by arthur            #+#    #+#             */
+/*   Updated: 2025/08/25 15:58:32 by arthur           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 // Libère un tableau de char**
@@ -36,6 +48,8 @@ void	free_commande(t_commande *cmd)
 		cmd = cmd->next;
 		free_args(tmp->args);
 		free_redirection(tmp->redirection);
+		if (tmp->path)
+			free_args(tmp->path);
 		free(tmp);
 	}
 }
