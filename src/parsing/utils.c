@@ -1,4 +1,17 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utils.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/29 13:54:31 by arthur            #+#    #+#             */
+/*   Updated: 2025/08/25 16:05:09 by arthur           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
+
 
 char	*ft_strjoin(char *s1, char const *s2)
 {
@@ -17,13 +30,17 @@ char	*ft_strjoin(char *s1, char const *s2)
 	i = 0;
 	dest = malloc(sizeof(char) * (ft_strlen(s1) + ft_strlen(s2) + 1));
 	if (dest == NULL)
+	{
+		if (s1 && s1[0] == '\0')
+			free(s1);
 		return (NULL);
+	}
 	while (s1[++j])
 		dest[j] = s1[j];
 	while (s2[i])
 		dest[j++] = s2[i++];
 	dest[j] = '\0';
-	return (free(s1), s1 = NULL, dest);
+	return (dest);
 }
 
 char	*ft_strdup(const char *s1)
