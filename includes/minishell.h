@@ -1,14 +1,26 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   minishell.h                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/29 13:54:31 by arthur            #+#    #+#             */
+/*   Updated: 2025/08/25 14:34:50 by arthur           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
+# include <readline/readline.h>
+# include <readline/history.h>
 # include <stdio.h>
 # include <stdlib.h>
 # include <signal.h>
 # include <unistd.h>
 # include <fcntl.h>
 # include <sys/wait.h>
-# include <readline/readline.h>
-# include <readline/history.h>
 # define SHELL_NAME "minishell: "
 # define CMD_NOT_FOUND " No such file or directory\n"
 
@@ -146,30 +158,59 @@ char	*ft_substr(char const *s, unsigned int start, size_t len);
 int		ft_isalnum(int c);
 int		ft_strncmp(const char *s1, const char *s2, size_t n);
 int		is_valid_var_char(char c);
-int	ft_strcmp(const char *s1, const char *s2);
-int	command_dispatch(t_commande *cmd_list, char **env);
-int	exec_builtin(t_commande *cmd_list, char **env);
-int	exec_absolute_cmd(t_commande *cmd_list, char **env);
+int		ft_strcmp(const char *s1, const char *s2);
+
+
+// cmd_type.c
+int	is_it_builtin(char *cmd_name);
+void	identify_cmd_type(t_commande *cmd_list);
 
 // exec.c
-int	exec_cmd(t_commande *cmd_list, char **env);
-int	exec_pipeline(t_commande *cmd_list, char **env);
-int	execute(t_commande *cmd_list, char	**env);
+int	command_dispatch(t_commande *cmd_list, char **env);
 int	exec_single_cmd(t_commande *cmd_list, char **env);
+int	exec_absolute_cmd(t_commande *cmd_list, char **env);
+void exec_child(t_commande *cmd_list, t_pipeline *pipeline, char **env, int i);
+int	exec_pipeline(t_commande *cmd_list, char **env);
+int	exec_builtin(t_commande *cmd_list, char **env);
+void close_and_wait(t_pipeline *pipeline);
+
+// exec_utils.c
+char	**ft_split_ex(const char *s, char sep);
+void	ft_putstr_fd(char *s, int fd);
+int	ft_strcmp(const char *s1, const char *s2);
+void	*ft_calloc(size_t count, size_t size);
+void	init_pipeline(t_pipeline *pipeline);
+
+// free.c
+void	free_pipes(int *pipes, int count);
+void	close_all_pipes(int **pipes, int count);
+
+// here_doc.c
+int	is_it_delimiter(char *line, char *delimiter);
+int	handle_heredoc_redirect(t_redirection *redir);
 
 // path.c
 void	get_path_env(t_commande *cmd_list, char **env);
 char	*create_full_path(t_commande	*cmd_list, char **env);
 
 // pipeline.c
-int    create_pipes(int cmd_count);
+int    count_command (t_commande *cmd_list);
+int    create_pipes(t_pipeline *pipeline);
 
 // redirect.c
 int    dispatch_redirect(t_commande *cmd_list);
 int    handle_input_redirect(t_redirection *redir);
 int    handle_output_redirect(t_redirection *redir);
 int    handle_append_redirect(t_redirection *redir);
+int    handle_pipe_redirect(t_redirection *redir, t_commande *cmd_list, int **pipes, int i);
 
-// here_doc.c
+// builtins
+int  ft_cd(char **args, char **env);
+int  ft_echo(char **args);
+int  ft_env(char **env);
+int  ft_exit(char **args);
+int  ft_export(char **args, char **env);
+int  ft_pwd(void);
+int  ft_unset(char **args, char **env);
 
 #endif
