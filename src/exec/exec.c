@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/29 13:54:31 by arthur            #+#    #+#             */
-/*   Updated: 2025/08/25 14:25:32 by arthur           ###   ########.fr       */
+/*   Updated: 2025/08/25 14:39:48 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,7 +150,7 @@ int	exec_pipeline(t_commande *cmd_list, char **env)
 void close_and_wait(t_pipeline *pipeline)
 {
 	close_all_pipes(pipeline->pipes, pipeline->cmd_count);
-	while (wait(NULL) > 0);
+	while (wait(NULL) > 0)
             ;
 	free_pipes(pipeline->pipes, pipeline->cmd_count);
 }
