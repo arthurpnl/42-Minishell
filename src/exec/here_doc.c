@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   here_doc.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/06 15:47:50 by arthur            #+#    #+#             */
+/*   Updated: 2025/08/25 14:53:17 by arthur           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 int	is_it_delimiter(char *line, char *delimiter)
@@ -37,6 +49,6 @@ int	handle_heredoc_redirect(t_redirection *redir)
         free(line);
     }
     close(pipe_fd[1]);
-    redir->fd = piped_fd[0];
+    redir->fd = pipe_fd[0];
     return (0);
 }

@@ -1,5 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/29 13:54:31 by arthur            #+#    #+#             */
+/*   Updated: 2025/08/25 16:36:45 by arthur           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
+void rl_replace_line(const char *text, int clear_undo);
 void	sig_handler(int sig)
 {
 	(void)sig;
@@ -12,6 +25,8 @@ void	sig_handler(int sig)
 
 int main(int ac, char **av, char **envp)
 {
+	(void)ac;
+	(void)av;
 	char	*input;
 	char	*str;
 	t_token	*head;
@@ -36,7 +51,7 @@ int main(int ac, char **av, char **envp)
 		else
 		{
 			str = clean_space(input);
-			printf("%s\n", str);
+			//printf("%s\n", str);
 			// char	**res = ft_split(str);
 			// while (*res)
 			// 	printf("(%s)\n", *res++);
@@ -48,7 +63,8 @@ int main(int ac, char **av, char **envp)
 
 				if (commands)
 				{
-					print_commande(commands);
+					//print_commande(commands);
+					command_dispatch(commands, cpy_env);
 					// une fois terminé
 					free_commande(commands);
 				}
