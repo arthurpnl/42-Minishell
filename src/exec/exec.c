@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/29 13:54:31 by arthur            #+#    #+#             */
-/*   Updated: 2025/09/04 16:26:58 by arthur           ###   ########.fr       */
+/*   Updated: 2025/09/04 17:03:09 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ int	command_dispatch(t_commande *cmd_list, t_shell_ctx *ctx)
 	if (!cmd_list->next)
 	{
 		if (cmd_list->type == CMD_BUILTIN)
-			status = exec_builtin(cmd_list, ctx->env);
+			status = exec_builtin(cmd_list, ctx);
 		else if (cmd_list->type == CMD_SIMPLE)
 			status = exec_single_cmd(cmd_list, ctx);
 		else if (cmd_list->type == CMD_ABSOLUTE || cmd_list->type == CMD_RELATIVE)
@@ -32,7 +32,7 @@ int	command_dispatch(t_commande *cmd_list, t_shell_ctx *ctx)
 			status = 1;
 	}
 	else
-		status = exec_pipeline(cmd_list, ctx->env);
+		status = exec_pipeline(cmd_list, ctx);
 
 	ctx->last_status = status;
 	return (status);
@@ -149,7 +149,7 @@ int	exec_pipeline(t_commande *cmd_list, t_shell_ctx *ctx)  // ✅ CHANGEMENT
 		}
 		if (pid == 0)
 		{
-			exec_child(curr, pipeline, ctx->env, i);
+			exec_child(curr, pipeline, ctx, i);
 			exit(EXIT_FAILURE);
 		}
 		pipeline->pids[i] = pid;
@@ -171,7 +171,7 @@ void exec_child(t_commande *cmd_list, t_pipeline *pipeline, t_shell_ctx *ctx, in
 		exit(EXIT_FAILURE);
 
 	if (cmd_list->type == CMD_BUILTIN)
-		exit(exec_builtin(cmd_list, ctx->env));
+		exit(exec_builtin(cmd_list, ctx));
 	else
 		exec_command_direct(cmd_list, ctx);
 }

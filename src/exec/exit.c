@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 17:42:11 by arthur            #+#    #+#             */
-/*   Updated: 2025/09/04 16:03:03 by arthur           ###   ########.fr       */
+/*   Updated: 2025/09/04 17:12:11 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ int    count_args(char **args)
         i++;
     return (i);
 }
+/*
 int    ft_exit(char **args)
 {
     int    arg_count;
@@ -52,4 +53,4 @@ int    ft_exit(char **args)
     arg_count = count_args(args);
     if (arg_count == 1);
 
-}
+}*/

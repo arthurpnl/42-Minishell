@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/29 13:54:31 by arthur            #+#    #+#             */
-/*   Updated: 2025/08/27 17:25:18 by arthur           ###   ########.fr       */
+/*   Updated: 2025/09/04 17:11:47 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,11 @@ int main(int ac, char **av, char **envp)
 	char	*str;
 	t_token	*head;
 	char	**cpy_env;
+	t_shell_ctx	ctx;
 
 	cpy_env = ft_cpy_envp(envp);
+	ctx.env = cpy_env;
+	ctx.last_status = 0;
 	head = NULL;
 	signal(SIGINT, sig_handler);
 	signal(SIGQUIT, SIG_IGN);
@@ -51,12 +54,8 @@ int main(int ac, char **av, char **envp)
 		else
 		{
 			str = clean_space(input);
-			//printf("%s\n", str);
-			// char	**res = ft_split(str);
-			// while (*res)
-			// 	printf("(%s)\n", *res++);
 			free(input);
-			tokenize_line(&head, str, cpy_env);
+			tokenize_line(&head, str, ctx.env);
 			if (!check_syntax(head))
 			{
 				t_commande *commands = convert_tokens_to_command(head);
@@ -64,12 +63,10 @@ int main(int ac, char **av, char **envp)
 				if (commands)
 				{
 					print_commande(commands);
-					command_dispatch(commands, cpy_env);
-					// une fois terminé
+					command_dispatch(commands, &ctx);
 					free_commande(commands);
 				}
 			}
-			// print_tokens(head);
 			ft_free_token(&head);
 			free(str);
 		}
