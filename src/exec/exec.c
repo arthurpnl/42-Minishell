@@ -6,34 +6,40 @@
 /*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/29 13:54:31 by arthur            #+#    #+#             */
-/*   Updated: 2025/08/25 16:50:52 by arthur           ###   ########.fr       */
+/*   Updated: 2025/09/04 16:26:58 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	command_dispatch(t_commande *cmd_list, char **env)
+int	command_dispatch(t_commande *cmd_list, t_shell_ctx *ctx)
 {
+	int	status = 0;
+
 	if (!cmd_list || !cmd_list->args || !cmd_list->args[0])
 		return (0);
 
 	identify_cmd_type(cmd_list);
-	if(!cmd_list->next)
+	if (!cmd_list->next)
 	{
 		if (cmd_list->type == CMD_BUILTIN)
-			return (exec_builtin(cmd_list, env));
+			status = exec_builtin(cmd_list, ctx->env);
 		else if (cmd_list->type == CMD_SIMPLE)
-			return (exec_single_cmd(cmd_list, env));
+			status = exec_single_cmd(cmd_list, ctx);
 		else if (cmd_list->type == CMD_ABSOLUTE || cmd_list->type == CMD_RELATIVE)
-			return (exec_absolute_cmd(cmd_list, env));
+			status = exec_absolute_cmd(cmd_list, ctx);
 		else
-			return (1); // error
+			status = 1;
 	}
 	else
-		return (exec_pipeline(cmd_list, env));
+		status = exec_pipeline(cmd_list, ctx->env);
+
+	ctx->last_status = status;
+	return (status);
 }
 
-int	exec_single_cmd(t_commande *cmd_list, char **env)
+
+int	exec_single_cmd(t_commande *cmd_list, t_shell_ctx *ctx)
 {
 	char	*cmd_path;
 	int	status;
@@ -44,7 +50,7 @@ int	exec_single_cmd(t_commande *cmd_list, char **env)
 	pid = fork();
 	if  (pid == 0)
 	{
-		cmd_path = create_full_path(cmd_list, env);
+		cmd_path = create_full_path(cmd_list, ctx->env);
 		if (!cmd_path)
 		{
 			ft_putstr_fd(SHELL_NAME, 2);
@@ -57,7 +63,7 @@ int	exec_single_cmd(t_commande *cmd_list, char **env)
 			free(cmd_path);
             exit(EXIT_FAILURE);
 		}
-		execve(cmd_path, cmd_list->args, env);
+		execve(cmd_path, cmd_list->args, ctx->env);
 		perror(cmd_list->args[0]);
 		free(cmd_path);
 		exit(EXIT_FAILURE);
@@ -71,7 +77,7 @@ int	exec_single_cmd(t_commande *cmd_list, char **env)
 		return (1);
 }
 
-int	exec_absolute_cmd(t_commande *cmd_list, char **env)
+int	exec_absolute_cmd(t_commande *cmd_list, t_shell_ctx *ctx)
 {
 	int	status;
 	pid_t	pid;
@@ -88,7 +94,7 @@ int	exec_absolute_cmd(t_commande *cmd_list, char **env)
 	{
         if (dispatch_redirect(cmd_list) != 0)
             exit(EXIT_FAILURE);
-		execve(cmd_list->args[0], cmd_list->args, env);
+		execve(cmd_list->args[0], cmd_list->args, ctx->env);
 		perror(cmd_list->args[0]);
 		exit(126);
 	}
@@ -101,33 +107,34 @@ int	exec_absolute_cmd(t_commande *cmd_list, char **env)
 		return (1);
 }
 
-int exec_command_direct(t_commande *cmd_list, char **env)
+int exec_command_direct(t_commande *cmd_list, t_shell_ctx *ctx)
 {
 	if (cmd_list->type == CMD_SIMPLE)
 	{
 		char *cmd_path;
-		cmd_path = create_full_path(cmd_list, env);
+		cmd_path = create_full_path(cmd_list, ctx->env);
 		if (!cmd_path)
 			exit(127);
-		execve(cmd_path, cmd_list->args, env);
+		execve(cmd_path, cmd_list->args, ctx->env);
 		free(cmd_path);
 	}
 	else if (cmd_list->type == CMD_ABSOLUTE || cmd_list->type == CMD_RELATIVE)
-		execve(cmd_list->args[0], cmd_list->args, env);
+		execve(cmd_list->args[0], cmd_list->args, ctx->env);
 	exit(127);
 }
 
-int	exec_pipeline(t_commande *cmd_list, char **env)
+int	exec_pipeline(t_commande *cmd_list, t_shell_ctx *ctx)  // ✅ CHANGEMENT
 {
 	pid_t    pid;
 	t_pipeline    *pipeline;
 	t_commande    *curr;
 	int	i;
+	int status = 0;
 
 	i = 0;
 	curr = cmd_list;
 	pipeline = malloc(sizeof(t_pipeline));
-	init_pipeline(pipeline, cmd_list, env);
+	init_pipeline(pipeline, cmd_list, ctx->env);
 
 	if (create_pipes(pipeline) != 0)
 		return (1);
@@ -142,7 +149,7 @@ int	exec_pipeline(t_commande *cmd_list, char **env)
 		}
 		if (pid == 0)
 		{
-			exec_child(curr, pipeline, env, i);
+			exec_child(curr, pipeline, ctx->env, i);
 			exit(EXIT_FAILURE);
 		}
 		pipeline->pids[i] = pid;
@@ -150,12 +157,12 @@ int	exec_pipeline(t_commande *cmd_list, char **env)
 		i++;
 	}
 	close_all_pipes(pipeline->pipes, pipeline->cmd_count);
-
-	close_and_wait(pipeline);
-	return (0);
+	status = close_and_wait(pipeline);
+	return (status);
 }
 
-void exec_child(t_commande *cmd_list, t_pipeline *pipeline, char **env, int i)
+
+void exec_child(t_commande *cmd_list, t_pipeline *pipeline, t_shell_ctx *ctx, int i)
 {
 	if (pipeline->cmd_count > 1)
 		handle_pipe_redirect(pipeline->pipes, i, pipeline->cmd_count);
@@ -164,9 +171,9 @@ void exec_child(t_commande *cmd_list, t_pipeline *pipeline, char **env, int i)
 		exit(EXIT_FAILURE);
 
 	if (cmd_list->type == CMD_BUILTIN)
-		exit(exec_builtin(cmd_list, env));
+		exit(exec_builtin(cmd_list, ctx->env));
 	else
-		exec_command_direct(cmd_list, env);
+		exec_command_direct(cmd_list, ctx);
 }
 
 /*void exec_child(t_commande *cmd_list, t_pipeline *pipeline, char **env, int i)
@@ -182,17 +189,21 @@ void exec_child(t_commande *cmd_list, t_pipeline *pipeline, char **env, int i)
 }*/
 
 
-void close_and_wait(t_pipeline *pipeline)
+int close_and_wait(t_pipeline *pipeline)
 {
-	// Les pipes sont déjà fermés par le parent
-	while (wait(NULL) > 0)
-		;
+	int status;
+	int last_status = 0;
+
+	while (wait(&status) > 0)
+		last_status = status >> 8;
+
 	free_pipes(pipeline->pipes, pipeline->cmd_count - 1);
 	free(pipeline->pids);
 	free(pipeline);
+	return (last_status);
 }
 
-int	exec_builtin(t_commande *cmd_list, char **env)
+int	exec_builtin(t_commande *cmd_list, t_shell_ctx *ctx)
 {
 	if (!cmd_list || !cmd_list->args || !cmd_list->args[0])
 		return (1);
@@ -200,19 +211,20 @@ int	exec_builtin(t_commande *cmd_list, char **env)
 	if (ft_strcmp(cmd_list->args[0], "echo") == 0)
 		return (ft_echo(cmd_list->args));
 	else if (ft_strcmp(cmd_list->args[0], "cd") == 0)
-		return (ft_cd(cmd_list->args, env));
+		return (ft_cd(cmd_list->args, ctx->env));
 	else if (ft_strcmp(cmd_list->args[0], "pwd") == 0)
 		return (ft_pwd());
 	else if (ft_strcmp(cmd_list->args[0], "export") == 0)
-		return (ft_export(cmd_list->args, env));
+		return (ft_export(cmd_list->args, ctx->env));
 	else if (ft_strcmp(cmd_list->args[0], "unset") == 0)
-		return (ft_unset(cmd_list->args, env));
+		return (ft_unset(cmd_list->args, ctx->env));
 	else if (ft_strcmp(cmd_list->args[0], "env") == 0)
-		return (ft_env(env));
+		return (ft_env(ctx->env));
 	else if (ft_strcmp(cmd_list->args[0], "exit") == 0)
 		return (ft_exit(cmd_list->args));
 	return (1);
 }
+
 
 
 

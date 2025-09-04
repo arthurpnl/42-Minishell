@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/29 13:54:31 by arthur            #+#    #+#             */
-/*   Updated: 2025/08/25 16:53:06 by arthur           ###   ########.fr       */
+/*   Updated: 2025/09/04 16:55:28 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,12 @@ typedef struct s_pipeline
     int    last_status;
     char   **env;
 }    t_pipeline;
+
+typedef struct s_shell_ctx
+{
+	int	last_status;
+	char **env;
+}	t_shell_ctx;
 
 // main.c
 void	sig_handler(int sig);
@@ -168,14 +174,14 @@ int	is_it_builtin(char *cmd_name);
 void	identify_cmd_type(t_commande *cmd_list);
 
 // exec.c
-int	command_dispatch(t_commande *cmd_list, char **env);
-int	exec_single_cmd(t_commande *cmd_list, char **env);
-int	exec_absolute_cmd(t_commande *cmd_list, char **env);
-void exec_child(t_commande *cmd_list, t_pipeline *pipeline, char **env, int i);
-int	exec_pipeline(t_commande *cmd_list, char **env);
-int	exec_builtin(t_commande *cmd_list, char **env);
-int exec_command_direct(t_commande *cmd_list, char **env);
-void close_and_wait(t_pipeline *pipeline);
+int	command_dispatch(t_commande *cmd_list, t_shell_ctx *ctx);
+int	exec_single_cmd(t_commande *cmd_list, t_shell_ctx *ctx);
+int	exec_absolute_cmd(t_commande *cmd_list, t_shell_ctx *ctx);
+void exec_child(t_commande *cmd_list, t_pipeline *pipeline, t_shell_ctx *ctx, int i);
+int	exec_pipeline(t_commande *cmd_list, t_shell_ctx *ctx);
+int	exec_builtin(t_commande *cmd_list, t_shell_ctx *ctx);
+int exec_command_direct(t_commande *cmd_list, t_shell_ctx *ctx);
+int close_and_wait(t_pipeline *pipeline);
 
 // exec_utils.c
 char	**ft_split_ex(const char *s, char sep);
@@ -208,6 +214,7 @@ int    handle_input_redirect(t_redirection *redir);
 int    handle_output_redirect(t_redirection *redir);
 int    handle_append_redirect(t_redirection *redir);
 int    handle_pipe_redirect(int **pipes, int i, int cmd_count);
+
 // builtins
 int  ft_cd(char **args, char **env);
 int  ft_echo(char **args);

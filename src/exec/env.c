@@ -6,10 +6,10 @@
 /*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:23:13 by arthur            #+#    #+#             */
-/*   Updated: 2025/08/26 17:28:15 by arthur           ###   ########.fr       */
+/*   Updated: 2025/08/27 17:27:15 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
+/*
 #includde "minishell.h"
 
 int    ft_env(char **env)
@@ -25,4 +25,4 @@ int    ft_env(char **env)
         i++;
     }
     return (0);
-}
+}*/

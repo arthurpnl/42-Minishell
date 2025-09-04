@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/29 13:54:31 by arthur            #+#    #+#             */
-/*   Updated: 2025/08/25 16:36:45 by arthur           ###   ########.fr       */
+/*   Updated: 2025/08/27 17:25:18 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ int main(int ac, char **av, char **envp)
 
 				if (commands)
 				{
-					//print_commande(commands);
+					print_commande(commands);
 					command_dispatch(commands, cpy_env);
 					// une fois terminé
 					free_commande(commands);

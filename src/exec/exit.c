@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 17:42:11 by arthur            #+#    #+#             */
-/*   Updated: 2025/08/27 18:14:37 by arthur           ###   ########.fr       */
+/*   Updated: 2025/09/04 16:03:03 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ int    count_args(char **args)
         return (0);
     while (args[i])
         i++;
-    return (count);
+    return (i);
 }
 int    ft_exit(char **args)
 {

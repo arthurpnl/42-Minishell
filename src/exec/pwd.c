@@ -6,10 +6,10 @@
 /*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:14:29 by arthur            #+#    #+#             */
-/*   Updated: 2025/08/26 17:22:37 by arthur           ###   ########.fr       */
+/*   Updated: 2025/08/27 17:27:04 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
+/*
 #include "minishell.h"
 
 int    ft_pwd(void)
@@ -25,4 +25,4 @@ int    ft_pwd(void)
     ft_printf("%S\n", pwd_path);
     free(pwd_path);
     return (0);
-}
+}*/
