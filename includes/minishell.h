@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/29 13:54:31 by arthur            #+#    #+#             */
-/*   Updated: 2025/09/04 16:55:28 by arthur           ###   ########.fr       */
+/*   Updated: 2025/09/04 17:01:00 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -191,6 +191,8 @@ void	*ft_calloc(size_t count, size_t size);
 void	ft_putchar_fd(char c, int fd);
 void	*ft_memset(void *s, int c, size_t n);
 void	init_pipeline(t_pipeline *pipeline, t_commande *cmd_list, char **env);
+void	ft_putchar(char c);
+void	ft_putstr(char *s);
 
 // free.c
 void	free_pipes(int **pipes, int count);
