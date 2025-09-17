@@ -6,49 +6,89 @@
 /*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/15 16:30:54 by arthur            #+#    #+#             */
-/*   Updated: 2025/09/15 17:38:14 by arthur           ###   ########.fr       */
+/*   Updated: 2025/09/17 16:23:51 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int    ft_unset(char **args, t_shell_ctx *ctx)
+static int is_valid_identifier(const char *name)
 {
-    int    i;
+    int i;
 
+    if (!name || !name[0])
+        return 0;
+    if (!((name[0] >= 'A' && name[0] <= 'Z') ||
+          (name[0] >= 'a' && name[0] <= 'z') || name[0] == '_'))
+        return 0;
     i = 1;
-    if (!args[i])
-        return (1);
-    while (args[i])
+    while (name[i])
     {
-        int    j;
-
-        j = 0;
-        while (ctx->env[j])
-        {
-            if (ft_strncmp(ctx->env[j], args[i], ft_strlen(args[i])) == 0 &&
-                ctx->env[j][ft_strlen(args[i])] == '=')
-            {
-                free(ctx->env[j]);
-                move_var(j, ctx->env);
-            }
-            else
-                j++;
-        }
+        char c = name[i];
+        if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
+              (c >= '0' && c <= '9') || c == '_'))
+            return 0;
         i++;
     }
-    return (0);
+    return 1;
 }
 
-void    move_var(int i, char **env)
+static int remove_env_at(t_shell_ctx *ctx, int idx)
 {
-    int    j;
+    int j;
 
-    j = i;
-    while(env[j])
+    if (!ctx || !ctx->env || !ctx->env[idx])
+        return 0;
+    free(ctx->env[idx]);
+    j = idx;
+    while (ctx->env[j + 1])
     {
-        env[j] = env[j + 1];
+        ctx->env[j] = ctx->env[j + 1];
         j++;
     }
-    env[j] = NULL;
+    ctx->env[j] = NULL;
+    return 1;
+}
+
+static int unset_one_arg(t_shell_ctx *ctx, const char *name)
+{
+    size_t len;
+    int j;
+    len = ft_strlen(name);
+    j = 0;
+
+    while (ctx && ctx->env && ctx->env[j])
+    {
+        if (ft_strncmp(ctx->env[j], name, len) == 0 && ctx->env[j][len] == '=')
+            return remove_env_at(ctx, j);
+        j++;
+    }
+    return 0;
+}
+
+int ft_unset(char **args, t_shell_ctx *ctx)
+{
+    int i;
+    int status;
+
+    i = 1;
+    status = 0;
+
+    if (!args || !args[1])
+        return 0;
+
+    while (args[i])
+    {
+        if (!is_valid_identifier(args[i]))
+        {
+            ft_putstr_fd("minishell: unset: '", 2);
+            ft_putstr_fd(args[i], 2);
+            ft_putstr_fd("': not a valid identifier\n", 2);
+            status = 1;
+        }
+        else
+            unset_one_arg(ctx, args[i]);
+        i++;
+    }
+    return status;
 }
