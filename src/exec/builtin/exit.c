@@ -1,0 +1,74 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   exit.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/27 17:42:11 by arthur            #+#    #+#             */
+/*   Updated: 2025/09/22 16:28:26 by arthur           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "minishell.h"
+
+
+int    is_valid_number(char *str)
+{
+    int    i;
+
+    i = 0;
+    if (!str || !str[0])
+        return (0);
+    if (str[i] == '+' || str[i] == '-')
+        i++;
+    while (str[i])
+    {
+        if (str[i] < '0' || str[i] > '9')
+            return (0);
+        i++;
+    }
+    return (1);
+}
+
+int    count_args(char **args)
+{
+    int    i;
+
+    i = 0;
+    if (!args)
+        return (0);
+    while (args[i])
+        i++;
+    return (i - 1);
+}
+
+int    ft_exit(char **args, t_shell_ctx *ctx)
+{
+    int    arg_count;
+    if (!args || !args[0])
+        return (1);
+
+    ft_putstr("exit\n");
+    arg_count = count_args(args);
+    if (arg_count == 0)
+        exit(ctx->last_status);
+    if (arg_count == 1)
+    {
+        if (is_valid_number(args[1]))
+            exit(ft_atoi(args[1]) % 256);
+        else
+        {
+			ft_putstr_fd("minishell: exit: ", 2);
+			ft_putstr_fd(args[1], 2);
+            ft_putstr_fd(": numeric argument required", 2);
+            exit(2);
+        }
+    }
+	if (arg_count > 1)
+	{
+		ft_putstr_fd("minishell: exit: too many arguments", 2);
+		return (1);
+	}
+	return (0);
+}
