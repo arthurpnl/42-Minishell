@@ -109,7 +109,6 @@ void	ft_putstr_fd(char *s, int fd)
 	}
 }
 
-
 int	ft_strcmp(const char *s1, const char *s2)
 {
 	size_t	i;

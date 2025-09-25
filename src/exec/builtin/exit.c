@@ -12,59 +12,63 @@
 
 #include "minishell.h"
 
-
-int    is_valid_number(char *str)
+int	is_valid_number(char *str)
 {
-    int    i;
+	int	i;
 
-    i = 0;
-    if (!str || !str[0])
-        return (0);
-    if (str[i] == '+' || str[i] == '-')
-        i++;
-    while (str[i])
-    {
-        if (str[i] < '0' || str[i] > '9')
-            return (0);
-        i++;
-    }
-    return (1);
+	i = 0;
+	if (!str || !str[0])
+		return (0);
+	if (str[i] == '+' || str[i] == '-')
+		i++;
+	while (str[i])
+	{
+		if (str[i] < '0' || str[i] > '9')
+			return (0);
+		i++;
+	}
+	return (1);
 }
 
-int    count_args(char **args)
+int	count_args(char **args)
 {
-    int    i;
+	int	i;
 
-    i = 0;
-    if (!args)
-        return (0);
-    while (args[i])
-        i++;
-    return (i - 1);
+	i = 0;
+	if (!args)
+		return (0);
+	while (args[i])
+		i++;
+	return (i - 1);
 }
 
-int    ft_exit(char **args, t_shell_ctx *ctx)
+void	print_error(char	**args)
 {
-    int    arg_count;
-    if (!args || !args[0])
-        return (1);
+	ft_putstr_fd("minishell: exit: ", 2);
+	ft_putstr_fd(args[1], 2);
+	ft_putstr_fd(": numeric argument required\n", 2);
+}
 
-    ft_putstr("exit\n");
-    arg_count = count_args(args);
-    if (arg_count == 0)
-        exit(ctx->last_status);
-    if (arg_count == 1)
-    {
-        if (is_valid_number(args[1]))
-            exit(ft_atoi(args[1]) % 256);
-        else
-        {
-			ft_putstr_fd("minishell: exit: ", 2);
-			ft_putstr_fd(args[1], 2);
-            ft_putstr_fd(": numeric argument required", 2);
-            exit(2);
-        }
-    }
+int	ft_exit(char **args, t_shell_ctx *ctx)
+{
+	int	arg_count;
+
+	if (!args || !args[0])
+		return (1);
+	printf("exit\n");
+	arg_count = count_args(args);
+	if (arg_count == 0)
+		exit(ctx->last_status);
+	if (arg_count == 1)
+	{
+		if (is_valid_number(args[1]))
+			exit(ft_atoi(args[1]) % 256);
+		else
+		{
+			print_error(args);
+			exit(2);
+		}
+	}
 	if (arg_count > 1)
 	{
 		ft_putstr_fd("minishell: exit: too many arguments", 2);

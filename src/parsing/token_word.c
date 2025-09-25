@@ -3,41 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   token_word.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
+/*   By: mehdi <mehdi@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/29 13:54:31 by arthur            #+#    #+#             */
-/*   Updated: 2025/08/25 16:01:48 by arthur           ###   ########.fr       */
+/*   Created: 2025/07/01 15:24:43 by mehdi             #+#    #+#             */
+/*   Updated: 2025/09/24 19:20:43 by mehdi            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-t_token_word	*split_node_word(char *str, char **env)
-{
-	char			**word;
-	int				i;
-	t_token_word	*head_word;
-	t_token_word	*new_word;
-
-	head_word = NULL;
-	i = 0;
-	word = ft_split_word(str);
-	if (!word)
-		return (NULL);
-	while (word[i])
-	{
-		new_word = new_node_word(word[i]);
-		if (!new_word)
-			exit(1);
-		fill_expandable(new_word);
-		expand(new_word, env);
-		// printf("expanddddddd %s\n", new_word->word);
-		add_back_word(&head_word, new_word);
-		i++;
-	}
-	free_split(word);
-	return (head_word);
-}
 
 t_token_word	*new_node_word(char *str)
 {
@@ -46,7 +19,7 @@ t_token_word	*new_node_word(char *str)
 	new = malloc(sizeof(t_token_word));
 	if (!new)
 		return (NULL);
-	new->word = ft_strdup(str);
+	new->word = str;
 	new->expendable = 1;
 	new->next = NULL;
 	return (new);
@@ -65,7 +38,7 @@ t_token	*new_node(t_token_word *word)
 	return (new);
 }
 
-void	fill_expandable(t_token_word *token)
+static int	fill_expandable(t_token_word *token)
 {
 	char	*str;
 
@@ -74,24 +47,50 @@ void	fill_expandable(t_token_word *token)
 	if (token->word[0] == '\'' || token->word[0] == '\"')
 	{
 		str = delete_quote(token->word);
+		if (!str)
+			return (1);
 		free(token->word);
 		token->word = str;
 	}
+	return (0);
 }
 
-char	*delete_quote(char *str)
+static int	add_word_to_list(t_token_word **head, char *str, t_shell_ctx *ctx)
 {
-	char	*line;
-	int		i;
-	int		j;
+	t_token_word	*new;
 
-	i = 1;
-	j = 0;
-	line = malloc(sizeof(char) * (ft_strlen(str) - 1));
-	if (!line)
+	new = new_node_word(str);
+	if (!new)
+		return (1);
+	if (fill_expandable(new))
+		return (1);
+	if (expand_token_word(new, ctx))
+		return (1);
+	add_back_word(head, new);
+	return (0);
+}
+
+t_token_word	*split_node_word(char *str, t_shell_ctx *ctx)
+{
+	char			**word;
+	int				i;
+	t_token_word	*head;
+
+	head = NULL;
+	word = ft_split_word(str);
+	if (!word)
 		return (NULL);
-	while (str[i+1])
-		line[j++] = str[i++];
-	line[j] = '\0';
-	return (line);
+	i = 0;
+	while (word[i])
+	{
+		if (add_word_to_list(&head, word[i], ctx))
+		{
+			free_split(word);
+			free_token_words(head);
+			return (NULL);
+		}
+		i++;
+	}
+	free(word);
+	return (head);
 }

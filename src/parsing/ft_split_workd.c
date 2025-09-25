@@ -1,10 +1,22 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_split_word.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mehdi <mehdi@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/30 12:12:44 by mben-tha          #+#    #+#             */
+/*   Updated: 2025/09/21 13:11:46 by mehdi            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
-int	ft_countwords_word(const char *s)
+static int	ft_countwords_word(const char *s)
 {
 	int		i;
 	int		count;
-	char 	quote;
+	char	quote;
 
 	i = 0;
 	count = 0;
@@ -28,8 +40,7 @@ int	ft_countwords_word(const char *s)
 	return (count);
 }
 
-
-int	ft_len_word_word(char const *s)
+static int	ft_len_word_word(char const *s)
 {
 	int		i;
 	char	quote;
@@ -51,7 +62,7 @@ int	ft_len_word_word(char const *s)
 	return (i);
 }
 
-char	*ft_mall_word(char const *s)
+static char	*ft_mall_word(char const *s)
 {
 	int		i;
 	char	*dest;

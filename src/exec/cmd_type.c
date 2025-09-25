@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   cmd_type.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: arpenel <arpenel@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/25 16:42:59 by arpenel           #+#    #+#             */
+/*   Updated: 2025/09/25 16:43:00 by arpenel          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 int	is_it_builtin(char *cmd_name)
@@ -12,7 +24,7 @@ int	is_it_builtin(char *cmd_name)
 		return (1);
 	else if (ft_strcmp(cmd_name, "export") == 0)
 		return (1);
-	else if(ft_strcmp(cmd_name, "unset") == 0)
+	else if (ft_strcmp(cmd_name, "unset") == 0)
 		return (1);
 	else if (ft_strcmp(cmd_name, "env") == 0)
 		return (1);
@@ -34,9 +46,10 @@ void	identify_cmd_type(t_commande *cmd_list)
 				current->type = CMD_BUILTIN;
 			else if (current->args[0][0] == '/')
 				current->type = CMD_ABSOLUTE;
-			else if(current->args[0][0] == '.' && current->args[0][1] == '/')
+			else if (current->args[0][0] == '.' && current->args[0][1] == '/')
 				current->type = CMD_RELATIVE;
-			else if(current->args[0][0] == '.' && current->args[0][1] == '.' && current->args[0][2] == '/')
+			else if (current->args[0][0] == '.' && current->args[0][1] == '.'
+				&& current->args[0][2] == '/')
 				current->type = CMD_RELATIVE;
 			else
 				current->type = CMD_SIMPLE;

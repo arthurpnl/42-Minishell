@@ -1,45 +1,22 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_split_token.c                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mehdi <mehdi@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/30 12:12:44 by mben-tha          #+#    #+#             */
+/*   Updated: 2025/09/19 16:44:28 by mehdi            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
-int	ft_countwords(const char *s)
+static int	ft_len_word(const char *s, int i)
 {
-	int		i;
-	int		count;
-	char 	quote;
-
-	i = 0;
-	count = 0;
-	while (s[i])
-	{
-		if (s[i] == ' ')
-			i++;
-		if (!s[i])
-			break;
-		count++;
-		while (s[i] != ' ' && s[i])
-		{
-			if (s[i] == '\'' || s[i] == '\"')
-			{
-				quote = s[i++];
-				while (s[i] && s[i] != quote)
-					i++;
-				if (s[i])
-					i++;
-			}
-			while (s[i] && s[i] != ' ' && s[i] != '\'' && s[i] != '\"')
-				i++;
-		}
-	}
-	return (count);
-}
-
-
-int	ft_len_word(char const *s)
-{
-	int		i;
 	char	quote;
 
-	i = 0;
-	while (s[i] != ' ' && s[i])
+	while (s[i] && s[i] != ' ')
 	{
 		if (s[i] == '\'' || s[i] == '\"')
 		{
@@ -49,21 +26,40 @@ int	ft_len_word(char const *s)
 			if (s[i])
 				i++;
 		}
-		while (s[i] && s[i] != ' ' && s[i] != '\'' && s[i] != '\"')
+		else
 			i++;
 	}
 	return (i);
 }
 
-char	*ft_mall(char const *s)
+static int	ft_countwords(const char *s)
+{
+	int	i;
+	int	count;
+
+	i = 0;
+	count = 0;
+	while (s[i])
+	{
+		while (s[i] == ' ')
+			i++;
+		if (!s[i])
+			break ;
+		count++;
+		i = ft_len_word(s, i);
+	}
+	return (count);
+}
+
+static char	*ft_mall(char const *s)
 {
 	int		i;
 	char	*dest;
 	int		len;
 
 	i = 0;
-	len = ft_len_word(s);
-	dest = malloc((ft_len_word(s) + 1) * sizeof(char));
+	len = ft_len_word(s, 0);
+	dest = malloc((len + 1) * sizeof(char));
 	if (dest == NULL)
 		return (NULL);
 	while (i < len)
@@ -90,7 +86,7 @@ int	fr(char **result, int i)
 	return (0);
 }
 
-char	**ft_split(char const *s)
+char	**ft_split_token(char const *s)
 {
 	int			i;
 	int			j;
@@ -112,7 +108,7 @@ char	**ft_split(char const *s)
 			result[i++] = ft_mall(&s[j]);
 			if (fr(result, i - 1))
 				return (NULL);
-			j += ft_len_word(&s[j]);
+			j += ft_len_word(&s[j], 0);
 		}
 	}
 	result[i] = 0;

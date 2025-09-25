@@ -1,16 +1,28 @@
-#includde "minishell.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   env.c                                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: arpenel <arpenel@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/25 16:38:21 by arpenel           #+#    #+#             */
+/*   Updated: 2025/09/25 16:38:22 by arpenel          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-int    ft_env(char **env)
+#include "minishell.h"
+
+int	ft_env(char **env)
 {
-    int    i;
+	int	i;
 
-    i = 0;
-    if (!env)
-        return (1);
-    while (env[i])
-    {
-        ft_printf("%s\n", env[i]);
-        i++;
-    }
-    return (0);
+	i = 0;
+	if (!env)
+		return (1);
+	while (env[i])
+	{
+		printf("%s\n", env[i]);
+		i++;
+	}
+	return (0);
 }

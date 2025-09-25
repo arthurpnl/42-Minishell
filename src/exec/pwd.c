@@ -12,17 +12,17 @@
 /*
 #include "minishell.h"
 
-int    ft_pwd(void)
+int	ft_pwd(void)
 {
-    char    *pwd_path;
+	char    *pwd_path;
 
-    pwd_path = getcwd(NULL, 0);
-    if (!pwd_path)
-    {
-        perror("getcwd");
-        return (1);
-    }
-    ft_printf("%S\n", pwd_path);
-    free(pwd_path);
-    return (0);
+	pwd_path = getcwd(NULL, 0);
+	if (!pwd_path)
+	{
+		perror("getcwd");
+		return (1);
+	}
+	ft_printf("%S\n", pwd_path);
+	free(pwd_path);
+	return (0);
 }*/

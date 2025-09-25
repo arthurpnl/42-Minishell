@@ -14,11 +14,11 @@
 
 int	command_dispatch(t_commande *cmd_list, t_shell_ctx *ctx)
 {
-	int	status = 0;
+	int	status;
 
+	status = 0;
 	if (!cmd_list || !cmd_list->args || !cmd_list->args[0])
 		return (0);
-
 	identify_cmd_type(cmd_list);
 	if (!cmd_list->next)
 	{
@@ -26,42 +26,42 @@ int	command_dispatch(t_commande *cmd_list, t_shell_ctx *ctx)
 			status = exec_builtin(cmd_list, ctx);
 		else if (cmd_list->type == CMD_SIMPLE)
 			status = exec_single_cmd(cmd_list, ctx);
-		else if (cmd_list->type == CMD_ABSOLUTE || cmd_list->type == CMD_RELATIVE)
+		else if (cmd_list->type == CMD_ABSOLUTE
+			|| cmd_list->type == CMD_RELATIVE)
 			status = exec_absolute_cmd(cmd_list, ctx);
 		else
 			status = 1;
 	}
 	else
 		status = exec_pipeline(cmd_list, ctx);
-
 	ctx->last_status = status;
 	return (status);
 }
 
-
 int	exec_single_cmd(t_commande *cmd_list, t_shell_ctx *ctx)
 {
 	char	*cmd_path;
-	int	status;
+	int		status;
 	pid_t	pid;
 
 	if (!cmd_list || !cmd_list->args || !cmd_list->args[0])
 		return (1);
 	pid = fork();
-	if  (pid == 0)
+	if (pid == 0)
 	{
 		cmd_path = create_full_path(cmd_list, ctx->env);
 		if (!cmd_path)
 		{
 			ft_putstr_fd(SHELL_NAME, 2);
 			ft_putstr_fd(cmd_list->args[0], 2);
-			ft_putstr_fd(CMD_NOT_FOUND"\n", 2); // ajouter l'input de l'user "xx: command not found"
-			exit (127);
+			ft_putstr_fd(CMD_NOT_FOUND "\n", 2);
+				// ajouter l'input de l'user "xx: command not found"
+			exit(127);
 		}
-        if (dispatch_redirect(cmd_list) != 0)
+		if (dispatch_redirect(cmd_list) != 0)
 		{
 			free(cmd_path);
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 		execve(cmd_path, cmd_list->args, ctx->env);
 		perror(cmd_list->args[0]);
@@ -79,7 +79,7 @@ int	exec_single_cmd(t_commande *cmd_list, t_shell_ctx *ctx)
 
 int	exec_absolute_cmd(t_commande *cmd_list, t_shell_ctx *ctx)
 {
-	int	status;
+	int		status;
 	pid_t	pid;
 
 	if (!cmd_list || !cmd_list->args || !cmd_list->args[0])
@@ -92,8 +92,8 @@ int	exec_absolute_cmd(t_commande *cmd_list, t_shell_ctx *ctx)
 	pid = fork();
 	if (pid == 0)
 	{
-        if (dispatch_redirect(cmd_list) != 0)
-            exit(EXIT_FAILURE);
+		if (dispatch_redirect(cmd_list) != 0)
+			exit(EXIT_FAILURE);
 		execve(cmd_list->args[0], cmd_list->args, ctx->env);
 		perror(cmd_list->args[0]);
 		exit(126);
@@ -107,11 +107,12 @@ int	exec_absolute_cmd(t_commande *cmd_list, t_shell_ctx *ctx)
 		return (1);
 }
 
-int exec_command_direct(t_commande *cmd_list, t_shell_ctx *ctx)
+int	exec_command_direct(t_commande *cmd_list, t_shell_ctx *ctx)
 {
+		char *cmd_path;
+
 	if (cmd_list->type == CMD_SIMPLE)
 	{
-		char *cmd_path;
 		cmd_path = create_full_path(cmd_list, ctx->env);
 		if (!cmd_path)
 			exit(127);
@@ -123,12 +124,12 @@ int exec_command_direct(t_commande *cmd_list, t_shell_ctx *ctx)
 	exit(127);
 }
 
-int	exec_pipeline(t_commande *cmd_list, t_shell_ctx *ctx)  // ✅ CHANGEMENT
+int	exec_pipeline(t_commande *cmd_list, t_shell_ctx *ctx)
 {
-	pid_t    pid;
-	t_pipeline    *pipeline;
-	t_commande    *curr;
-	int	i;
+	pid_t pid;
+	t_pipeline *pipeline;
+	t_commande *curr;
+	int i;
 	int status = 0;
 
 	i = 0;
@@ -157,19 +158,17 @@ int	exec_pipeline(t_commande *cmd_list, t_shell_ctx *ctx)  // ✅ CHANGEMENT
 		i++;
 	}
 	close_all_pipes(pipeline->pipes, pipeline->cmd_count);
-	status = close_and_wait(pipeline);
+	status = close_and_wait(pipeline, ctx);
 	return (status);
 }
 
-
-void exec_child(t_commande *cmd_list, t_pipeline *pipeline, t_shell_ctx *ctx, int i)
+void	exec_child(t_commande *cmd_list, t_pipeline *pipeline, t_shell_ctx *ctx,
+		int i)
 {
 	if (pipeline->cmd_count > 1)
 		handle_pipe_redirect(pipeline->pipes, i, pipeline->cmd_count);
-
 	if (dispatch_redirect(cmd_list) != 0)
 		exit(EXIT_FAILURE);
-
 	if (cmd_list->type == CMD_BUILTIN)
 		exit(exec_builtin(cmd_list, ctx));
 	else
@@ -178,6 +177,9 @@ void exec_child(t_commande *cmd_list, t_pipeline *pipeline, t_shell_ctx *ctx, in
 
 /*void exec_child(t_commande *cmd_list, t_pipeline *pipeline, char **env, int i)
 {
+	int	status;
+	int	last_status;
+
 	if (pipeline->cmd_count > 1)
 		handle_pipe_redirect(pipeline->pipes, i, pipeline->cmd_count);
 	if (dispatch_redirect(cmd_list) != 0)
@@ -187,19 +189,29 @@ void exec_child(t_commande *cmd_list, t_pipeline *pipeline, t_shell_ctx *ctx, in
 	else
 		exec_command_direct(cmd_list, env);
 }*/
-
-
-int close_and_wait(t_pipeline *pipeline)
+int close_and_wait(t_pipeline *pipeline, t_shell_ctx *ctx)
 {
+	int i;
 	int status;
-	int last_status = 0;
+	int last_status;
 
-	while (wait(&status) > 0)
-		last_status = status >> 8;
+	if (!pipeline || !pipeline->pids)
+		return (1);
 
-	free_pipes(pipeline->pipes, pipeline->cmd_count - 1);
-	free(pipeline->pids);
-	free(pipeline);
+	last_status = 0;
+	i = 0;
+	while (i < pipeline->cmd_count)
+	{
+		if (waitpid(pipeline->pids[i], &status, 0) > 0)
+		{
+			if (WIFEXITED(status))
+				last_status = WEXITSTATUS(status);
+			else if (WIFSIGNALED(status))
+				last_status = 128 + WTERMSIG(status);
+		}
+		i++;
+	}
+	ctx->last_status = last_status;
 	return (last_status);
 }
 
@@ -207,24 +219,19 @@ int	exec_builtin(t_commande *cmd_list, t_shell_ctx *ctx)
 {
 	if (!cmd_list || !cmd_list->args || !cmd_list->args[0])
 		return (1);
-
 	if (ft_strcmp(cmd_list->args[0], "echo") == 0)
 		return (ft_echo(cmd_list->args));
 	else if (ft_strcmp(cmd_list->args[0], "cd") == 0)
-		return (ft_cd(cmd_list->args, ctx->env));
+		return (ft_cd(cmd_list->args, ctx));
 	else if (ft_strcmp(cmd_list->args[0], "pwd") == 0)
 		return (ft_pwd());
 	else if (ft_strcmp(cmd_list->args[0], "export") == 0)
-		return (ft_export(cmd_list->args, ctx->env));
+		return (ft_export(cmd_list->args, ctx));
 	else if (ft_strcmp(cmd_list->args[0], "unset") == 0)
-		return (ft_unset(cmd_list->args, ctx->env));
+		return (ft_unset(cmd_list->args, ctx));
 	else if (ft_strcmp(cmd_list->args[0], "env") == 0)
 		return (ft_env(ctx->env));
 	else if (ft_strcmp(cmd_list->args[0], "exit") == 0)
-		return (ft_exit(cmd_list->args));
+		return (ft_exit(cmd_list->args, ctx));
 	return (1);
 }
-
-
-
-

@@ -2,13 +2,13 @@
 
 void	get_path_env(t_commande *cmd_list, char **env)
 {
-	int	i;
+	int		i;
 	char	*path_line;
 
 	i = 0;
-	while(env[i])
+	while (env[i])
 	{
-		if(ft_strncmp(env[i], "PATH=", 5) == 0)
+		if (ft_strncmp(env[i], "PATH=", 5) == 0)
 		{
 			path_line = env[i] + 5;
 			cmd_list->path = ft_split_ex(path_line, ':');
@@ -18,12 +18,12 @@ void	get_path_env(t_commande *cmd_list, char **env)
 	}
 }
 
-char	*create_full_path(t_commande	*cmd_list, char **env)
+char	*create_full_path(t_commande *cmd_list, char **env)
 {
-	char	*cmd_path;
-	char	*full_path;
-	char	*cmd;
-	int	j;
+	char *cmd_path;
+	char *full_path;
+	char *cmd;
+	int j;
 
 	j = 0;
 	cmd = cmd_list->args[0];
@@ -31,8 +31,8 @@ char	*create_full_path(t_commande	*cmd_list, char **env)
 	if (!cmd_list->path)
 		get_path_env(cmd_list, env);
 	if (!cmd_list->path)
-		return NULL;
-	while(cmd_list->path && cmd_list->path[j])
+		return (NULL);
+	while (cmd_list->path && cmd_list->path[j])
 	{
 		full_path = ft_strjoin(cmd_list->path[j], "/");
 		cmd_path = ft_strjoin(full_path, cmd);

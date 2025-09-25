@@ -14,34 +14,34 @@
 
 void	free_pipes(int **pipes, int count)
 {
-    int    i;
+	int	i;
 
-    i = 0;
-    if (!pipes || count <= 1)
-        return ;
-    while(i < count - 1)
-    {
-        if (pipes[i])
-            free(pipes[i]);
-        i++;
-    }
-    free(pipes);
+	i = 0;
+	if (!pipes || count <= 1)
+		return ;
+	while (i < count - 1)
+	{
+		if (pipes[i])
+			free(pipes[i]);
+		i++;
+	}
+	free(pipes);
 }
 
 void	close_all_pipes(int **pipes, int count)
 {
-    int    i;
+	int i;
 
-    i = 0;
-    if (!pipes)
-        return ;
-    while (i < count - 1)
-    {
-        if(pipes[i])
-        {
-            close(pipes[i][0]);
-            close(pipes[i][1]);
-        }
-        i++;
-    }
+	i = 0;
+	if (!pipes)
+		return ;
+	while (i < count - 1)
+	{
+		if (pipes[i])
+		{
+			close(pipes[i][0]);
+			close(pipes[i][1]);
+		}
+		i++;
+	}
 }

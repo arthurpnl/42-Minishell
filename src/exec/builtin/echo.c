@@ -12,28 +12,28 @@
 
 #include "minishell.h"
 
-int    ft_echo(char **args)
+int	ft_echo(char **args)
 {
-    int    i;
-    int    new_line;
+	int	i;
+	int	new_line;
 
-    new_line = 1;
-    i = 1;
-    if (!args)
-        return (1);
-    if (args[1] && ft_strcmp(args[1], "-n") == 0)
-    {
-        new_line = 0;
-        i = 2;
-    }
-    while (args[i])
-    {
-        ft_putstr(args[i]);
-        if (args[i + 1])
-            ft_putchar(' ');
-        i++;
-    }
-    if (new_line == 1)
-        ft_putchar('\n');
-    return (0);
+	new_line = 1;
+	i = 1;
+	if (!args)
+		return (1);
+	if (args[1] && ft_strcmp(args[1], "-n") == 0)
+	{
+		new_line = 0;
+		i = 2;
+	}
+	while (args[i])
+	{
+		printf("%s", args[i]);
+		if (args[i + 1])
+			printf(" ");
+		i++;
+	}
+	if (new_line == 1)
+		printf("\n");
+	return (0);
 }

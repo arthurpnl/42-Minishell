@@ -23,6 +23,7 @@
 # include <fcntl.h>
 # include <stddef.h>
 # include <sys/wait.h>
+# include "../Libft/includes/libft.h"
 # define SHELL_NAME "minishell: "
 # define CMD_NOT_FOUND " No such file or directory\n"
 
@@ -99,75 +100,75 @@ void print_tokens(t_token *token);
 void	ft_free_token(t_token **stack);
 
 // token.c
-void	tokenize_line(t_token **token, char *line, char **env);
-t_token	*new_node_operator(char *word);
-int		operator(char *word);
-void	add_back(t_token **token, t_token *new);
 void	add_back_word(t_token_word **token, t_token_word *new);
-void	free_split(char **tab);
+t_token	*create_tok(char *word, t_shell_ctx *ctx, char **res, t_token **token);
+int	tokenize_line(t_token **token, char *str, t_shell_ctx *ctx);
+char	*delete_quote(char *str);
+int	operator(char *word);
+int	handle_token_error(char **res, t_token **token);
 
 // token_word.c
-t_token_word	*split_node_word(char *str, char **env);
-t_token	*new_node(t_token_word *word);
 t_token_word	*new_node_word(char *str);
-void	fill_expandable(t_token_word *token);
-char	*delete_quote(char *str);
+t_token	*new_node(t_token_word *word);
+t_token_word	*split_node_word(char *str, t_shell_ctx *ctx);
 
 // ft_split_token.c
-int		ft_countwords(char const *s);
-int		ft_len_word(char const *s);
-char	*ft_mall(char const *s);
 int		fr(char **result, int i);
-char	**ft_split(char const *s);
+char	**ft_split_token(char const *s);
 
 // ft_split_word.c
 char	**ft_split_word(char const *s);
-char	*ft_mall_word(char const *s);
-int	ft_len_word_word(char const *s);
-int	ft_countwords_word(const char *s);
 
 // clean_space.c
 char    *clean_space(char *str);
 int		is_double_operator(char *str);
-int		ft_strlen(const char *str);
 int		is_operator(char c);
+int	skip_spaces(char *str, int i);
+int	skip_spaces2(char *str, char *res, int i, int *j);
+int	handle_quotes(char *str, char *res, int *i, int j);
+int	handle_double_op(char *str, char *res, int *i, int j);
 
-// quote_closed.c
-int		quote_not_closed(char *str);
+// quote_and_env.c
+int	unclosed_quote(char *str);
+char	**ft_cpy_envp(char **envp);
+void	free_envp(char **envp);
+void	free_token_words(t_token_word *head);
+void	free_tokens(t_token *head);
 
 // expand.c
-char	**ft_cpy_envp(char **envp);
-char	*get_env_value(char *var_name, char **env);
-void	expand(t_token_word *token, char **env);
+char	*expand_dollar(char *res, const char *word, int *i, t_shell_ctx *ctx);
+int		expand_token_word(t_token_word *token, t_shell_ctx *ctx);
+int		is_valid_var_char(char c);
+char	*expand_status(char *res, int status, int *i);
 
 // check_syntax.c
 int	check_syntax(t_token *tokens);
 int	is_redirection(t_token_type type);
 int	is_word(t_token *token);
+int	print_pipe_error(void);
+int	print_redir_error(t_token *next);
+int	print_heredoc_error(void);
 
 // token_to_command.c
 int	count_words(t_token_word *word);
 char	*join_token_words(t_token_word *word);
 t_redirection *add_redirection(t_redirection **redir_list, t_token_type type, t_token_word *word);
 char **append_arg(char **args, t_token_word *word);
-t_commande	*convert_tokens_to_command(t_token *tokens);
+t_commande	*tokens_to_command(t_token *tokens);
 
-// free_command.c
+// free.c
 void	free_args(char **args);
 void	free_redirection(t_redirection *redir);
 void	free_commande(t_commande *cmd);
+void	free_split(char **split);
+
+// print.c
+void print_tokens(t_token *token);
 void	print_redirection(t_redirection *redir);
 void	print_commande(t_commande *cmd_list);
 
 // utils.c
-char	*ft_strdup(const char *s1);
 char	*ft_strjoin(char *s1, char const *s2);
-char	*ft_substr(char const *s, unsigned int start, size_t len);
-int		ft_isalnum(int c);
-int		ft_strncmp(const char *s1, const char *s2, size_t n);
-int		is_valid_var_char(char c);
-int		ft_strcmp(const char *s1, const char *s2);
-
 
 // cmd_type.c
 int	is_it_builtin(char *cmd_name);
@@ -181,7 +182,7 @@ void exec_child(t_commande *cmd_list, t_pipeline *pipeline, t_shell_ctx *ctx, in
 int	exec_pipeline(t_commande *cmd_list, t_shell_ctx *ctx);
 int	exec_builtin(t_commande *cmd_list, t_shell_ctx *ctx);
 int exec_command_direct(t_commande *cmd_list, t_shell_ctx *ctx);
-int close_and_wait(t_pipeline *pipeline);
+int close_and_wait(t_pipeline *pipeline, t_shell_ctx *ctx);
 
 // exec_utils.c
 char	**ft_split_ex(const char *s, char sep);
@@ -191,8 +192,6 @@ void	*ft_calloc(size_t count, size_t size);
 void	ft_putchar_fd(char c, int fd);
 void	*ft_memset(void *s, int c, size_t n);
 void	init_pipeline(t_pipeline *pipeline, t_commande *cmd_list, char **env);
-void	ft_putchar(char c);
-void	ft_putstr(char *s);
 
 // free.c
 void	free_pipes(int **pipes, int count);
@@ -218,12 +217,36 @@ int    handle_append_redirect(t_redirection *redir);
 int    handle_pipe_redirect(int **pipes, int i, int cmd_count);
 
 // builtins
-int  ft_cd(char **args, char **env);
-int  ft_echo(char **args);
-int  ft_env(char **env);
-int  ft_exit(char **args);
-int  ft_export(char **args, char **env);
-int  ft_pwd(void);
-int  ft_unset(char **args, char **env);
+int	ft_cd(char **args, t_shell_ctx *ctx);
+int	ft_echo(char **args);
+int	ft_env(char **env);
+int	ft_exit(char **args, t_shell_ctx *ctx);
+int	ft_export(char **args, t_shell_ctx *ctx);
+int	ft_pwd(void);
+int	ft_unset(char **args, t_shell_ctx *ctx);
+
+// export.c
+int	add_o_update_env(t_shell_ctx *ctx, char *name, char *value);
+int	update_var_env(t_shell_ctx *ctx, int i, char *name, char *value);
+int	add_new_env(t_shell_ctx *ctx, char *name, char *value);
+int	find_var_index(t_shell_ctx *ctx, char *name, char *value);
+int	process_single_arg(char *arg, t_shell_ctx *ctx);
+void	free_old_env(char **env);
+
+// cd_utils.c
+char	*get_path(void);
+int	change_dir(char *target);
+void	free_path(char *new_path, char *old_path);
+
+// export_utils.c
+char	**env_copy(char **env, char **new_env, int count);
+int	export_without_args(t_shell_ctx *ctx);
+int	parse_export_args(char *args, char **name, char **value);
+int	is_valid_identifier(const char *name);
+char	*build_new_entry(char *name, char *value);
+void	print_declare_format(char *env_var);
+
+// exit_utils.c
+int	count_args(char **args);
 
 #endif
