@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   redirect.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
+/*   By: arpenel <arpenel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/29 13:54:31 by arthur            #+#    #+#             */
-/*   Updated: 2025/08/25 17:01:37 by arthur           ###   ########.fr       */
+/*   Updated: 2025/09/26 17:14:22 by arpenel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,14 @@ int	dispatch_redirect(t_commande *cmd_list)
 		else if (current->type == TOK_REDIR_APPEND)
 			res = handle_append_redirect(current);
 		else if (current->type == TOK_HEREDOC)
+		{
 			res = handle_heredoc_redirect(current);
+			if (res == 0)
+			{
+				dup2(current->fd, STDIN_FILENO);
+				close(current->fd);
+			}
+		}
 		if (res != 0)
 			return (res);
 		current = current->next;

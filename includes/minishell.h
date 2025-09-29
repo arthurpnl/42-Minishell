@@ -23,9 +23,11 @@
 # include <fcntl.h>
 # include <stddef.h>
 # include <sys/wait.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 # include "../Libft/includes/libft.h"
 # define SHELL_NAME "minishell: "
-# define CMD_NOT_FOUND " No such file or directory\n"
+# define CMD_NOT_FOUND " command not found\n"
 
 typedef enum	e_token_type
 {
@@ -180,7 +182,8 @@ int	exec_single_cmd(t_commande *cmd_list, t_shell_ctx *ctx);
 int	exec_absolute_cmd(t_commande *cmd_list, t_shell_ctx *ctx);
 void exec_child(t_commande *cmd_list, t_pipeline *pipeline, t_shell_ctx *ctx, int i);
 int	exec_pipeline(t_commande *cmd_list, t_shell_ctx *ctx);
-int	exec_builtin(t_commande *cmd_list, t_shell_ctx *ctx);
+int	exec_builtin_cmd(t_commande *cmd_list, t_shell_ctx *ctx);
+int	exec_builtin(t_commande *cmd_list, t_shell_ctx *ctx); // tmp
 int exec_command_direct(t_commande *cmd_list, t_shell_ctx *ctx);
 int close_and_wait(t_pipeline *pipeline, t_shell_ctx *ctx);
 
@@ -192,6 +195,8 @@ void	*ft_calloc(size_t count, size_t size);
 void	ft_putchar_fd(char c, int fd);
 void	*ft_memset(void *s, int c, size_t n);
 void	init_pipeline(t_pipeline *pipeline, t_commande *cmd_list, char **env);
+int	is_empty_cmd(t_commande *cmd);
+int	can_exec(char *path, t_shell_ctx *ctx);
 
 // free.c
 void	free_pipes(int **pipes, int count);

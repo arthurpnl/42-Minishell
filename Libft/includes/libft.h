@@ -6,7 +6,7 @@
 /*   By: arpenel <arpenel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 08:43:38 by arpenel           #+#    #+#             */
-/*   Updated: 2025/04/18 16:22:12 by arpenel          ###   ########.fr       */
+/*   Updated: 2025/09/26 15:55:30 by arpenel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ size_t		ft_strlen(const char *str);
 size_t		ft_strlcpy(char *dst, const char *src, size_t dst_size);
 size_t		ft_strlcat(char *dest, const char *src, size_t size);
 void		ft_bzero(void *s, size_t n);
+char	*ft_strjoin_nofree(char const *s1, char const *s2);
 
 // additional functions //
 char		*ft_substr(char const *s, unsigned int start, size_t len);

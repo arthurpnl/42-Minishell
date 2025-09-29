@@ -32,6 +32,7 @@ static char	*expand_variable(char *res, const char *word, int *i, char **env)
 {
 	int		start;
 	char	*name;
+	char	*value;
 
 	start = ++(*i);
 	while (is_valid_var_char(word[*i]))
@@ -39,7 +40,11 @@ static char	*expand_variable(char *res, const char *word, int *i, char **env)
 	name = ft_substr(word, start, *i - start);
 	if (!name)
 		return (NULL);
-	res = ft_strjoin(res, get_env_value(name, env));
+	//res = ft_strjoin(res, get_env_value(name, env));
+	value = get_env_value(name, env);
+	if (!value)
+    	value = "";
+	res = ft_strjoin(res, value);
 	free(name);
 	return (res);
 }

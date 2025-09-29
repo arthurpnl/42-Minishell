@@ -6,7 +6,7 @@
 /*   By: arpenel <arpenel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 16:34:05 by arpenel           #+#    #+#             */
-/*   Updated: 2025/09/25 16:34:11 by arpenel          ###   ########.fr       */
+/*   Updated: 2025/09/26 15:57:57 by arpenel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,10 +39,10 @@ char	*build_new_entry(char *name, char *value)
 	char	*temp;
 	char	*new_entry;
 
-	temp = ft_strjoin(name, "=");
+	temp = ft_strjoin_nofree(name, "=");
 	if (!temp)
 		return (NULL);
-	new_entry = ft_strjoin(temp, value);
+	new_entry = ft_strjoin_nofree(temp, value);
 	free(temp);
 	if (!new_entry)
 		return (NULL);

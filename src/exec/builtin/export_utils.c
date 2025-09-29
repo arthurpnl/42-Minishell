@@ -6,7 +6,7 @@
 /*   By: arpenel <arpenel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 16:31:57 by arpenel           #+#    #+#             */
-/*   Updated: 2025/09/25 16:32:03 by arpenel          ###   ########.fr       */
+/*   Updated: 2025/09/26 18:08:19 by arpenel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,9 @@ int	process_single_arg(char *arg, t_shell_ctx *ctx)
 	}
 	else
 	{
-		printf("export: '%s': not a valid identifier\n", arg);
+		ft_putstr_fd("export: '", 2);
+		ft_putstr_fd(arg , 2);
+		ft_putstr_fd("': not a valid identifier\n", 2);
 		return (1);
 	}
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   here_doc.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
+/*   By: arpenel <arpenel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 15:47:50 by arthur            #+#    #+#             */
-/*   Updated: 2025/08/25 14:53:17 by arthur           ###   ########.fr       */
+/*   Updated: 2025/09/26 17:14:08 by arpenel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@ int	handle_heredoc_redirect(t_redirection *redir)
 			break ;
 		}
 		write(pipe_fd[1], line, ft_strlen(line));
+		write(pipe_fd[1], "\n", 1);
 		free(line);
 	}
 	close(pipe_fd[1]);

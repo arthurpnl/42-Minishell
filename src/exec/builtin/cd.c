@@ -6,7 +6,7 @@
 /*   By: arpenel <arpenel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 16:24:10 by arpenel           #+#    #+#             */
-/*   Updated: 2025/09/25 16:24:12 by arpenel          ###   ########.fr       */
+/*   Updated: 2025/09/26 18:09:43 by arpenel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ static char	*find_target(char **args)
 	if (args_count == 1 && ft_strcmp(args[1], "-") != 0)
 		return (target = args[1]);
 	if (args_count > 1)
-		printf("cd: too many arguments\n");
+		ft_putstr_fd("cd: too many arguments\n", 2);
 	return (target);
 }
 

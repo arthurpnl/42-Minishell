@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exit.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
+/*   By: arpenel <arpenel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 17:42:11 by arthur            #+#    #+#             */
-/*   Updated: 2025/09/22 16:28:26 by arthur           ###   ########.fr       */
+/*   Updated: 2025/09/29 19:00:57 by arpenel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,12 +55,16 @@ int	ft_exit(char **args, t_shell_ctx *ctx)
 
 	if (!args || !args[0])
 		return (1);
-	printf("exit\n");
+	
 	arg_count = count_args(args);
 	if (arg_count == 0)
-		exit(ctx->last_status);
+	{
+		printf("exit\n");
+		exit(0);
+	}
 	if (arg_count == 1)
 	{
+		printf("exit\n");
 		if (is_valid_number(args[1]))
 			exit(ft_atoi(args[1]) % 256);
 		else
@@ -69,10 +73,6 @@ int	ft_exit(char **args, t_shell_ctx *ctx)
 			exit(2);
 		}
 	}
-	if (arg_count > 1)
-	{
-		ft_putstr_fd("minishell: exit: too many arguments", 2);
-		return (1);
-	}
-	return (0);
+	ft_putstr_fd("minishell: exit: too many arguments\n", 2);
+	return (1);
 }

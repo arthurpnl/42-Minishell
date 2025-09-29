@@ -36,7 +36,7 @@ char	*create_full_path(t_commande *cmd_list, char **env)
 	{
 		full_path = ft_strjoin(cmd_list->path[j], "/");
 		cmd_path = ft_strjoin(full_path, cmd);
-		free(full_path);
+		//free(full_path);
 		if (access(cmd_path, X_OK) == 0)
 			return (cmd_path);
 		free(cmd_path);

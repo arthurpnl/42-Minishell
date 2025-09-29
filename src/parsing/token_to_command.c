@@ -153,15 +153,6 @@ t_commande	*tokens_to_command(t_token *tokens)
 }
 
 
-
-
-
-
-
-
-
-
-
 // // Compte le nombre de mots dans une liste chaînée
 // int	count_words(t_token_word *word)
 // {

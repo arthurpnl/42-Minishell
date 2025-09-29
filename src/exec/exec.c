@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.1337.ma>            +#+  +:+       +#+        */
+/*   By: arpenel <arpenel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/29 13:54:31 by arthur            #+#    #+#             */
-/*   Updated: 2025/09/04 17:03:09 by arthur           ###   ########.fr       */
+/*   Updated: 2025/09/29 19:13:56 by arpenel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,38 +14,35 @@
 
 int	command_dispatch(t_commande *cmd_list, t_shell_ctx *ctx)
 {
-	int	status;
-
-	status = 0;
-	if (!cmd_list || !cmd_list->args || !cmd_list->args[0])
-		return (0);
+	if (is_empty_cmd(cmd_list))
+		return (ctx->last_status = 0);
 	identify_cmd_type(cmd_list);
 	if (!cmd_list->next)
 	{
 		if (cmd_list->type == CMD_BUILTIN)
-			status = exec_builtin(cmd_list, ctx);
+			ctx->last_status = exec_builtin(cmd_list, ctx);
 		else if (cmd_list->type == CMD_SIMPLE)
-			status = exec_single_cmd(cmd_list, ctx);
+			ctx->last_status = exec_single_cmd(cmd_list, ctx);
 		else if (cmd_list->type == CMD_ABSOLUTE
 			|| cmd_list->type == CMD_RELATIVE)
-			status = exec_absolute_cmd(cmd_list, ctx);
+			ctx->last_status = exec_absolute_cmd(cmd_list, ctx);
 		else
-			status = 1;
+			ctx->last_status = 1;
 	}
 	else
-		status = exec_pipeline(cmd_list, ctx);
-	ctx->last_status = status;
-	return (status);
+		ctx->last_status = exec_pipeline(cmd_list, ctx);
+	return (ctx->last_status);
 }
 
 int	exec_single_cmd(t_commande *cmd_list, t_shell_ctx *ctx)
 {
 	char	*cmd_path;
-	int		status;
 	pid_t	pid;
 
-	if (!cmd_list || !cmd_list->args || !cmd_list->args[0])
-		return (1);
+	if (!cmd_list || !cmd_list->args)
+		return (ctx->last_status = 1);
+	if (!cmd_list->args[0] || cmd_list->args[0][0] == '\0')
+		return (ctx->last_status = 0);
 	pid = fork();
 	if (pid == 0)
 	{
@@ -53,9 +50,9 @@ int	exec_single_cmd(t_commande *cmd_list, t_shell_ctx *ctx)
 		if (!cmd_path)
 		{
 			ft_putstr_fd(SHELL_NAME, 2);
-			ft_putstr_fd(cmd_list->args[0], 2);
-			ft_putstr_fd(CMD_NOT_FOUND "\n", 2);
-				// ajouter l'input de l'user "xx: command not found"
+			//ft_putstr_fd(cmd_list->args[0], 2);
+			ft_putstr_fd(CMD_NOT_FOUND, 2);
+			// ajouter l'input de l'user "xx: command not found"
 			exit(127);
 		}
 		if (dispatch_redirect(cmd_list) != 0)
@@ -70,25 +67,21 @@ int	exec_single_cmd(t_commande *cmd_list, t_shell_ctx *ctx)
 	}
 	else if (pid > 0)
 	{
-		waitpid(pid, &status, 0);
-		return (status >> 8);
+		waitpid(pid, &ctx->last_status, 0);
+		return (ctx->last_status >> 8);
 	}
 	else
 		return (1);
 }
-
 int	exec_absolute_cmd(t_commande *cmd_list, t_shell_ctx *ctx)
 {
-	int		status;
 	pid_t	pid;
 
 	if (!cmd_list || !cmd_list->args || !cmd_list->args[0])
 		return (1);
-	if (access(cmd_list->args[0], X_OK) != 0)
-	{
-		perror(cmd_list->args[0]);
-		return (127);
-	}
+	ctx->last_status = can_exec(cmd_list->args[0], ctx);
+	if (ctx->last_status != 0)
+		return (ctx->last_status);
 	pid = fork();
 	if (pid == 0)
 	{
@@ -100,16 +93,15 @@ int	exec_absolute_cmd(t_commande *cmd_list, t_shell_ctx *ctx)
 	}
 	else if (pid > 0)
 	{
-		waitpid(pid, &status, 0);
-		return (status >> 8);
+		waitpid(pid, &ctx->last_status, 0);
+		return (ctx->last_status >> 8);
 	}
-	else
-		return (1);
+	return (1);
 }
 
 int	exec_command_direct(t_commande *cmd_list, t_shell_ctx *ctx)
 {
-		char *cmd_path;
+	char *cmd_path;
 
 	if (cmd_list->type == CMD_SIMPLE)
 	{
@@ -215,23 +207,48 @@ int close_and_wait(t_pipeline *pipeline, t_shell_ctx *ctx)
 	return (last_status);
 }
 
-int	exec_builtin(t_commande *cmd_list, t_shell_ctx *ctx)
+int	exec_builtin_cmd(t_commande *cmd_list, t_shell_ctx *ctx)
 {
 	if (!cmd_list || !cmd_list->args || !cmd_list->args[0])
 		return (1);
 	if (ft_strcmp(cmd_list->args[0], "echo") == 0)
-		return (ft_echo(cmd_list->args));
+		ctx->last_status = ft_echo(cmd_list->args);
 	else if (ft_strcmp(cmd_list->args[0], "cd") == 0)
-		return (ft_cd(cmd_list->args, ctx));
+		ctx->last_status = ft_cd(cmd_list->args, ctx);
 	else if (ft_strcmp(cmd_list->args[0], "pwd") == 0)
-		return (ft_pwd());
+		ctx->last_status = ft_pwd();
 	else if (ft_strcmp(cmd_list->args[0], "export") == 0)
-		return (ft_export(cmd_list->args, ctx));
+		ctx->last_status = ft_export(cmd_list->args, ctx);
 	else if (ft_strcmp(cmd_list->args[0], "unset") == 0)
-		return (ft_unset(cmd_list->args, ctx));
+		ctx->last_status = ft_unset(cmd_list->args, ctx);
 	else if (ft_strcmp(cmd_list->args[0], "env") == 0)
-		return (ft_env(ctx->env));
+		ctx->last_status = ft_env(ctx->env);
 	else if (ft_strcmp(cmd_list->args[0], "exit") == 0)
-		return (ft_exit(cmd_list->args, ctx));
-	return (1);
+		ctx->last_status = ft_exit(cmd_list->args, ctx);
+	else
+		ctx->last_status = 1;
+	return (ctx->last_status);
+}
+
+int	exec_builtin(t_commande *cmd_list, t_shell_ctx *ctx)
+{
+	int	pid;
+
+	if (!cmd_list || !cmd_list->args || !cmd_list->args[0])
+		return (1);
+	if (!cmd_list->redirection)
+		return (exec_builtin_cmd(cmd_list, ctx));
+	pid = fork();
+	if (pid == 0)
+	{
+		if (dispatch_redirect(cmd_list) != 0)
+			exit(EXIT_FAILURE);
+		exit(exec_builtin_cmd(cmd_list, ctx));
+	}
+	else if (pid > 0)
+	{
+		waitpid(pid, &ctx->last_status, 0);
+		return (ctx->last_status >> 8);
+	}
+	return (ctx->last_status = 1);
 }

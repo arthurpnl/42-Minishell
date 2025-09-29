@@ -46,6 +46,7 @@ FILES =  srcs/Libft/ft_memset \
          srcs/Libft/ft_lstdelone \
          srcs/Libft/ft_lstclear \
          srcs/Libft/ft_lstiter \
+         srcs/Libft/ft_strjoin_nofree \
 
 SRCS = $(addsuffix .c, $(FILES))
 OBJS = $(SRCS:.c=.o)
